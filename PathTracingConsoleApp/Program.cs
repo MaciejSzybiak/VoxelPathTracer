@@ -6,9 +6,10 @@ using VoxelPathTracing;
 
 const int renderSamples = 1000;
 const float gamma = 2.2f;
-const float fov = 0.45f;
+const float fov = 0.5f;
 var resolution = (x: 1000, y: 1000);
 var cameraOrigin = new Vector3(-6, 15, -10);
+var gridOrigin = (x: 0, y: 1, z: 0);
 
 void SaveImage(Vector3[,] render)
 {
@@ -29,12 +30,13 @@ void SaveImage(Vector3[,] render)
 
 Console.WriteLine($"SIMD: {Vector.IsHardwareAccelerated}");
 
-IGridProvider gridProvider = new ColumnGridProvider();
+IGridProvider gridProvider = new ColumnGridProvider(gridOrigin);
 var grid = gridProvider.Get();
 var world = new World(grid, Vector3.One, new Floor(0, new Material(Vector3.One * 0.7f, 0)));
 
+var center = new Vector3(grid.Size.X / 2f + gridOrigin.x, grid.Size.Y / 2f + gridOrigin.y, grid.Size.Z / 2f + gridOrigin.z);
 var camera = new PerspectiveCamera(fov, (float) resolution.x / resolution.y, 
-    cameraOrigin, Vector3.One * (grid.Size / 2f) - Vector3.UnitY * 1.7f, Vector3.UnitY);
+    cameraOrigin, center - Vector3.UnitY * 1.7f, Vector3.UnitY);
 var colorCorrection = new ColorCorrection(gamma, 1);
 var renderer = new Renderer(world, camera, colorCorrection, renderSamples, resolution);
 var stopwatch = new Stopwatch();

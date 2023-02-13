@@ -9,7 +9,7 @@ public class TestGridProvider : IGridProvider
     
     public Grid Get()
     {
-        var grid = new Grid(GridSize);
+        var grid = new Grid((GridSize, GridSize, GridSize), (0, 0, 0));
 
         for (var x = 0; x < GridSize; x++)
         {

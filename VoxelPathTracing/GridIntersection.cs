@@ -4,6 +4,8 @@ namespace VoxelPathTracing;
 
 public class GridIntersection
 {
+    private const float RayCropEpsilon = 0.01f;
+    
     private readonly Grid _grid;
 
     public GridIntersection(Grid grid)
@@ -13,6 +15,12 @@ public class GridIntersection
 
     public bool Intersects(Ray ray, out Hit hit)
     {
+        if (!TryCropRayToBounds(ref ray, out var maxLength))
+        {
+            hit = default;
+            return false;
+        }
+        
         var dx = ray.Direction.X;
         var dy = ray.Direction.Y;
         var dz = ray.Direction.Z;
@@ -73,34 +81,26 @@ public class GridIntersection
 
         if (xRayLength < yRayLength)
         {
-            if (xRayLength < zRayLength)
-            {
-                hitNormal = xNormal;
-            }
-            else
-            {
-                hitNormal = zNormal;
-            }
+            hitNormal = xRayLength < zRayLength ? xNormal : zNormal;
         }
         else
         {
-            if (yRayLength < zRayLength)
-            {
-                hitNormal = yNormal;
-            }
-            else
-            {
-                hitNormal = zNormal;
-            }
+            hitNormal = yRayLength < zRayLength ? yNormal : zNormal;
         }
         
         var rayLength = 0f;
+        var xMin = _grid.Origin.X;
+        var yMin = _grid.Origin.Y;
+        var zMin = _grid.Origin.Z;
+        var xMax = _grid.Size.X + _grid.Origin.X;
+        var yMax = _grid.Size.Y + _grid.Origin.Y;
+        var zMax = _grid.Size.Z + _grid.Origin.Z;
 
-        while (rayLength < 50)
+        while (rayLength < maxLength)
         {
-            if (xPosition >= 0 && xPosition < _grid.Size
-               && yPosition >= 0 && yPosition < _grid.Size
-               && zPosition >= 0 && zPosition < _grid.Size)
+            if (xPosition >= xMin && xPosition < xMax
+                && yPosition >= yMin && yPosition < yMax
+                && zPosition >= zMin && zPosition < zMax)
             {
                 var voxel = _grid[xPosition, yPosition, zPosition];
                 if (voxel is not null)
@@ -109,11 +109,6 @@ public class GridIntersection
                     return true;
                 }
             }
-            // else if (yPosition < 0 && ray.Direction.Y < 0)
-            // {
-            //     hit = new Hit(Vector3.UnitY, ray.Origin + ray.Direction * rayLength, (int.MaxValue, 0, 0), rayLength);
-            //     return true;
-            // }
 
             if (xRayLength < yRayLength)
             {
@@ -153,5 +148,41 @@ public class GridIntersection
         
         hit = new Hit();
         return false;
+    }
+
+    private bool TryCropRayToBounds(ref Ray ray, out float maxLength)
+    {
+        var xMin = _grid.Origin.X;
+        var yMin = _grid.Origin.Y;
+        var zMin = _grid.Origin.Z;
+        var xMax = _grid.Origin.X + _grid.Size.X;
+        var yMax = _grid.Origin.Y + _grid.Size.Y;
+        var zMax = _grid.Origin.Z + _grid.Size.Z;
+
+        var tx1 = (xMin - ray.Origin.X) * ray.DirectionInverted.X;
+        var tx2 = (xMax - ray.Origin.X) * ray.DirectionInverted.X;
+        
+        var tMin = MathF.Min(tx1, tx2);
+        var tMax = MathF.Max(tx1, tx2);
+        
+        var ty1 = (yMin - ray.Origin.Y) * ray.DirectionInverted.Y;
+        var ty2 = (yMax - ray.Origin.Y) * ray.DirectionInverted.Y;
+        
+        tMin = MathF.Max(tMin, MathF.Min(ty1, ty2));
+        tMax = MathF.Min(tMax, MathF.Max(ty1, ty2));
+        
+        var tz1 = (zMin - ray.Origin.Z) * ray.DirectionInverted.Z;
+        var tz2 = (zMax - ray.Origin.Z) * ray.DirectionInverted.Z;
+        
+        tMin = MathF.Max(tMin, MathF.Min(tz1, tz2));
+        tMax = MathF.Min(tMax, MathF.Max(tz1, tz2));
+
+        if (tMin >= 0)
+        {
+            ray.Origin += ray.Direction * (tMin - RayCropEpsilon);
+        }
+
+        maxLength = tMax - tMin + RayCropEpsilon;
+        return tMax >= tMin;
     }
 }
