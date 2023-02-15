@@ -4,30 +4,31 @@ namespace VoxelPathTracing;
 
 public class ColumnGridProvider : IGridProvider
 {
-    private static readonly (int X, int Y, int Z) GridSize = (15, 11, 15);
+    private readonly (int X, int Y, int Z) _size;
     private const float MaxColor = 0.85f;
     private const float MinColor = 0.55f;
-    private readonly Random _random = new(12345);
+    private readonly Random _random = new(999);
 
     private readonly (int X, int Y, int Z) _origin;
 
-    public ColumnGridProvider((int X, int Y, int Z) origin)
+    public ColumnGridProvider((int X, int Y, int Z) origin, (int X, int Y, int Z) size)
     {
         _origin = origin;
+        _size = size;
     }
 
     public Grid Get()
     {
-        var grid = new Grid(GridSize, _origin);
+        var grid = new Grid(_size, _origin);
 
-        for (var x = 0; x < GridSize.X; x++)
+        for (var x = 0; x < _size.X; x++)
         {
-            for (var z = 0; z < GridSize.Z; z++)
+            for (var z = 0; z < _size.Z; z++)
             {
-                var height = _random.Next(1, GridSize.Y - 1);
+                var height = _random.Next(0, _size.Y - 1);
                 Vector3 color;
                 float emission;
-                if (_random.Next() % 7 == 0)
+                if (_random.Next() % 5 == 0)
                 {
                     color = GetEmissiveColor();
                     emission = 0.5f;
@@ -38,7 +39,7 @@ public class ColumnGridProvider : IGridProvider
                     emission = 0f;
                 }
 
-                for (var y = 0; y < GridSize.Y; y++)
+                for (var y = 0; y < _size.Y; y++)
                 {
                     if (y <= height)
                     {

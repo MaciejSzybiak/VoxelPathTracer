@@ -4,12 +4,13 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VoxelPathTracing;
 
-const int renderSamples = 1000;
+const int renderSamples = 2000;
 const float gamma = 2.2f;
-const float fov = 0.5f;
-var resolution = (x: 1000, y: 1000);
-var cameraOrigin = new Vector3(-6, 15, -10);
-var gridOrigin = (x: 0, y: 1, z: 0);
+const float fov = 0.3f;
+var resolution = (x: 3440, y: 1440);
+var cameraOrigin = new Vector3(-9, 20, -10);
+var gridOrigin = (x: 0, y: 0, z: 0);
+var gridSize = (x: 6, y: 5, z: 6);
 
 void SaveImage(Vector3[,] render)
 {
@@ -30,21 +31,28 @@ void SaveImage(Vector3[,] render)
 
 Console.WriteLine($"SIMD: {Vector.IsHardwareAccelerated}");
 
-IGridProvider gridProvider = new ColumnGridProvider(gridOrigin);
+IGridProvider gridProvider = new ColumnGridProvider(gridOrigin, gridSize);
 var grid = gridProvider.Get();
-var world = new World(grid, Vector3.One, new Floor(0, new Material(Vector3.One * 0.7f, 0)));
+var world = new World(grid, Vector3.One * 0.7f, new Floor(0, new Material(Vector3.One * 0.7f, 0)));
 
 var center = new Vector3(grid.Size.X / 2f + gridOrigin.x, grid.Size.Y / 2f + gridOrigin.y, grid.Size.Z / 2f + gridOrigin.z);
+var target = center - Vector3.UnitY;
 var camera = new PerspectiveCamera(fov, (float) resolution.x / resolution.y, 
-    cameraOrigin, center - Vector3.UnitY * 1.7f, Vector3.UnitY);
+    cameraOrigin, target, Vector3.UnitY);
 var colorCorrection = new ColorCorrection(gamma, 1);
 var renderer = new Renderer(world, camera, colorCorrection, renderSamples, resolution);
 var stopwatch = new Stopwatch();
 
+var progress = new Progress<RenderProgress>();
+var image = new Vector3[1,1];
+progress.ProgressChanged += (sender, renderProgress) => image = renderProgress.Image;
+
+var cancellationTokenSource = new CancellationTokenSource();
+
 stopwatch.Start();
-var render = renderer.Render();
-stopwatch.Stop();
+await renderer.Render(progress, cancellationTokenSource.Token);
 var timeSpan = stopwatch.Elapsed;
+stopwatch.Stop();
 Console.WriteLine($"Time: {timeSpan.Minutes}:{timeSpan.Seconds}.{timeSpan.Milliseconds}");
 
-SaveImage(render);
+SaveImage(image);

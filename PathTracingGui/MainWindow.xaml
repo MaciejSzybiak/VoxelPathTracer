@@ -5,14 +5,70 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PathTracingGui"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="800" Width="1200">
     <Grid Name="Grid1" Margin="10">
-        <StackPanel Orientation="Horizontal">
-            <StackPanel Width="200">
-                <Separator></Separator>
+        <DockPanel HorizontalAlignment="Stretch" 
+                   VerticalAlignment="Stretch">
+            <StackPanel Width="300" DockPanel.Dock="Left">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Column="0" Grid.Row="0" Content="Samples"/>
+                    <TextBox Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" x:Name="Samples" TextAlignment="Right"/>
+                    <Label Grid.Column="0" Grid.Row="1" Content="Resolution"/>
+                    <TextBox Grid.Column="1" Grid.Row="1" x:Name="ResolutionX" TextAlignment="Right"/>
+                    <TextBox Grid.Column="2" Grid.Row="1" x:Name="ResolutionY" TextAlignment="Right"/>
+                    <Label Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" Content="Grid size"/>
+                    <TextBox Grid.Column="0" Grid.Row="3" x:Name="GridSizeX" TextAlignment="Right"/>
+                    <TextBox Grid.Column="1" Grid.Row="3" x:Name="GridSizeY" TextAlignment="Right"/>
+                    <TextBox Grid.Column="2" Grid.Row="3" x:Name="GridSizeZ" TextAlignment="Right"/>
+                    <Label Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3" Content="Grid origin"/>
+                    <TextBox Grid.Column="0" Grid.Row="5" x:Name="GridOriginX" TextAlignment="Right"/>
+                    <TextBox Grid.Column="1" Grid.Row="5" x:Name="GridOriginY" TextAlignment="Right"/>
+                    <TextBox Grid.Column="2" Grid.Row="5" x:Name="GridOriginZ" TextAlignment="Right"/>
+                    <Label Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" Content="Camera origin"/>
+                    <TextBox Grid.Column="0" Grid.Row="7" x:Name="CameraOriginX" TextAlignment="Right"/>
+                    <TextBox Grid.Column="1" Grid.Row="7" x:Name="CameraOriginY" TextAlignment="Right"/>
+                    <TextBox Grid.Column="2" Grid.Row="7" x:Name="CameraOriginZ" TextAlignment="Right"/>
+                    <Label Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3" Content="Camera target"/>
+                    <TextBox Grid.Column="0" Grid.Row="9" x:Name="CameraTargetX" TextAlignment="Right"/>
+                    <TextBox Grid.Column="1" Grid.Row="9" x:Name="CameraTargetY" TextAlignment="Right"/>
+                    <TextBox Grid.Column="2" Grid.Row="9" x:Name="CameraTargetZ" TextAlignment="Right"/>
+                    <Label Grid.Column="0" Grid.Row="10" Grid.ColumnSpan="3" Content="Ambient RGB" Name="BackgroundLabel"/>
+                    <Slider Grid.Column="0" Grid.Row="11" x:Name="BackgroundR" Maximum="1" Minimum="0" ValueChanged="Background_OnValueChanged"/>
+                    <Slider Grid.Column="1" Grid.Row="11" x:Name="BackgroundG" Maximum="1" Minimum="0" ValueChanged="Background_OnValueChanged"/>
+                    <Slider Grid.Column="2" Grid.Row="11" x:Name="BackgroundB" Maximum="1" Minimum="0" ValueChanged="Background_OnValueChanged"/>
+                </Grid>
+                <Separator/>
+                
+                <Button Name="RenderBtn" Click="RenderBtn_OnClick">Render</Button>
+                <Separator/>
+                
+                <Button Name="CancelBtn" Visibility="Collapsed" Click="CancelBtn_OnClick">Cancel</Button>
+                <ProgressBar Height="20" Name="ProgressBar" Visibility="Collapsed"></ProgressBar>
             </StackPanel>
             <Separator Opacity="0" Width="10"/>
-            <Image Name="RenderImage"></Image>
-        </StackPanel>
+            <Border>
+                <Image Name="RenderImage" HorizontalAlignment="Center"></Image>
+            </Border>
+        </DockPanel>
     </Grid>
 </Window>

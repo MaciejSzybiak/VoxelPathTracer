@@ -152,30 +152,17 @@ public class GridIntersection
 
     private bool TryCropRayToBounds(ref Ray ray, out float maxLength)
     {
-        var xMin = _grid.Origin.X;
-        var yMin = _grid.Origin.Y;
-        var zMin = _grid.Origin.Z;
-        var xMax = _grid.Origin.X + _grid.Size.X;
-        var yMax = _grid.Origin.Y + _grid.Size.Y;
-        var zMax = _grid.Origin.Z + _grid.Size.Z;
+        var tMin = float.NegativeInfinity;
+        var tMax = float.PositiveInfinity;
 
-        var tx1 = (xMin - ray.Origin.X) * ray.DirectionInverted.X;
-        var tx2 = (xMax - ray.Origin.X) * ray.DirectionInverted.X;
-        
-        var tMin = MathF.Min(tx1, tx2);
-        var tMax = MathF.Max(tx1, tx2);
-        
-        var ty1 = (yMin - ray.Origin.Y) * ray.DirectionInverted.Y;
-        var ty2 = (yMax - ray.Origin.Y) * ray.DirectionInverted.Y;
-        
-        tMin = MathF.Max(tMin, MathF.Min(ty1, ty2));
-        tMax = MathF.Min(tMax, MathF.Max(ty1, ty2));
-        
-        var tz1 = (zMin - ray.Origin.Z) * ray.DirectionInverted.Z;
-        var tz2 = (zMax - ray.Origin.Z) * ray.DirectionInverted.Z;
-        
-        tMin = MathF.Max(tMin, MathF.Min(tz1, tz2));
-        tMax = MathF.Min(tMax, MathF.Max(tz1, tz2));
+        var v1 = (_grid.Min - ray.Origin) * ray.DirectionInverted;
+        var v2 = (_grid.Max - ray.Origin) * ray.DirectionInverted;
+
+        for (var i = 0; i < 3; i++)
+        {
+            tMin = MathF.Max(tMin, MathF.Min(v1[i], v2[i]));
+            tMax = MathF.Min(tMax, MathF.Max(v1[i], v2[i]));
+        }
 
         if (tMin >= 0)
         {
