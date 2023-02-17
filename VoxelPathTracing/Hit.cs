@@ -6,7 +6,6 @@ public readonly struct Hit
 {
     public readonly Vector3 Normal;
     public readonly Vector3 Point;
-    // public readonly (int x, int y, int z) Voxel;
     public readonly Material Material;
     public readonly float Distance;
 

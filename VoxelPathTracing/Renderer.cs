@@ -112,7 +112,6 @@ public class Renderer
 
                         var ray = _perspectiveCamera.GetRay(new Vector2(dx, dy));
 
-                        // _image[x, y] += _rayTracer.Trace(ray);
                         renderedQuad.Image[x - quad.XStart, y - quad.YStart] += _rayTracer.Trace(ray);
                     }
                 }
@@ -140,12 +139,10 @@ public class Renderer
 
     private class RenderedQuad
     {
-        public readonly Quad Quad;
         public readonly Vector3[,] Image;
 
         public RenderedQuad(Quad quad)
         {
-            Quad = quad;
             Image = new Vector3[quad.XEnd - quad.XStart, quad.YEnd - quad.YStart];
         }
     }

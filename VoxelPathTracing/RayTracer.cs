@@ -61,7 +61,6 @@ public class RayTracer
         var incomingLight = TraceInternal(new Ray(correctedHitPoint, direction), depth - 1);
         if (IsSunVisibleFromHit(hit))
         {
-            // incomingLight *= (1 - _sunIntensity);
             incomingLight += _world.Sun.Color * SunIntensity;
         }
 
