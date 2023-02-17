@@ -9,12 +9,16 @@ public class RayTracer
     private readonly FloorIntersection _floorIntersection;
     private readonly Random _random;
 
+    private readonly Vector3 _sunReflectionDir;
+    private const float SunIntensity = 0.1f;
+
     public RayTracer(World world)
     {
         _world = world;
         _gridIntersection = new GridIntersection(_world.Grid);
         _floorIntersection = new FloorIntersection(_world.Floor);
         _random = new Random();
+        _sunReflectionDir = _world.Sun.Direction * -1;
     }
 
     public Vector3 Trace(Ray ray)
@@ -54,10 +58,30 @@ public class RayTracer
         var point = GetRandomPointOnUnitSphere() + correctedHitPoint + hit.Normal;
         var direction = Vector3.Normalize(point - correctedHitPoint);
 
+        var incomingLight = TraceInternal(new Ray(correctedHitPoint, direction), depth - 1);
+        if (IsSunVisibleFromHit(hit))
+        {
+            // incomingLight *= (1 - _sunIntensity);
+            incomingLight += _world.Sun.Color * SunIntensity;
+        }
+
         var light = hit.Material.Color * hit.Material.Emission +
-                    hit.Material.Color * TraceInternal(new Ray(correctedHitPoint, direction), depth - 1);
+                    hit.Material.Color * incomingLight;
 
         return light;
+    }
+
+    private bool IsSunVisibleFromHit(Hit hit)
+    {
+        if (Vector3.Dot(hit.Normal, _sunReflectionDir) < 0.001f)
+        {
+            return false;
+        }
+        
+        var correctedHitPoint = hit.Point + hit.Normal * 0.001f;
+        var ray = new Ray(correctedHitPoint, _sunReflectionDir);
+
+        return !_floorIntersection.Intersects(ray, out var _) && !_gridIntersection.Intersects(ray, out var _);
     }
 
     private Vector3 GetRandomPointOnUnitSphere()

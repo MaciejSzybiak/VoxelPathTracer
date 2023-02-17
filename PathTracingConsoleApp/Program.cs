@@ -4,7 +4,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VoxelPathTracing;
 
-const int renderSamples = 2000;
+const int renderSamples = 10000;
 const float gamma = 2.2f;
 const float fov = 0.3f;
 var resolution = (x: 3440, y: 1440);
@@ -33,7 +33,8 @@ Console.WriteLine($"SIMD: {Vector.IsHardwareAccelerated}");
 
 IGridProvider gridProvider = new ColumnGridProvider(gridOrigin, gridSize);
 var grid = gridProvider.Get();
-var world = new World(grid, Vector3.One * 0.7f, new Floor(0, new Material(Vector3.One * 0.7f, 0)));
+var sun = new Sun(Vector3.Normalize(new Vector3(1f, -1f, -0.5f)), Vector3.One);
+var world = new World(grid, Vector3.One * 0.8f, new Floor(0, new Material(Vector3.One * 0.65f, 0)), sun);
 
 var center = new Vector3(grid.Size.X / 2f + gridOrigin.x, grid.Size.Y / 2f + gridOrigin.y, grid.Size.Z / 2f + gridOrigin.z);
 var target = center - Vector3.UnitY;
@@ -53,6 +54,6 @@ stopwatch.Start();
 await renderer.Render(progress, cancellationTokenSource.Token);
 var timeSpan = stopwatch.Elapsed;
 stopwatch.Stop();
-Console.WriteLine($"Time: {timeSpan.Minutes}:{timeSpan.Seconds}.{timeSpan.Milliseconds}");
+Console.WriteLine($"Time: {timeSpan.Hours}:{timeSpan.Minutes}:{timeSpan.Seconds}.{timeSpan.Milliseconds}");
 
 SaveImage(image);

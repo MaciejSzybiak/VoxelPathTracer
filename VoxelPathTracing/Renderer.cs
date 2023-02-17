@@ -37,21 +37,6 @@ public class Renderer
         _yFraction = 1f / _halfResolutionY;
     }
 
-    // public async Task Render(IProgress<RenderProgress> progress)
-    // {
-    //     await RunThreads(progress);
-    //     //
-    //     // for (var x = 0; x < _resolution.x; x++)
-    //     // {
-    //     //     for (var y = 0; y < _resolution.y; y++)
-    //     //     {
-    //     //         _image[x, y] = _colorCorrection.Apply(_image[x, y] / _samples);
-    //     //     }
-    //     // }
-    //     //
-    //     // return _image;
-    // }
-
     public async Task Render(IProgress<RenderProgress> progress, CancellationToken cancellationToken)
     {
         var quads = new List<Quad>();
@@ -80,6 +65,7 @@ public class Renderer
                 var renderedQuad = await RunWorkOnQuad(quad);
 
                 currentTaskCount++;
+                var lastPercentage = renderProgress.Percentage;
                 renderProgress.Percentage = currentTaskCount * 100 / taskCount;
 
                 for (var x = quad.XStart; x < quad.XEnd; x++)
@@ -89,8 +75,11 @@ public class Renderer
                         renderProgress.SetPixel(x, y, _colorCorrection.Apply(renderedQuad.Image[x - quad.XStart, y - quad.YStart] / _samples));
                     }
                 }
-            
-                Console.WriteLine($"Rendered {renderProgress.Percentage}%");
+
+                if (lastPercentage != renderProgress.Percentage)
+                {
+                    Console.WriteLine($"Rendered {renderProgress.Percentage}%");
+                }
 
                 progress.Report(renderProgress);
             });

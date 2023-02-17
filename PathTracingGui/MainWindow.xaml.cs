@@ -82,7 +82,8 @@ namespace PathTracingGui
             var camera = new PerspectiveCamera(Fov, (float) _resolution.x / _resolution.y, 
                 _cameraOrigin, center - Vector3.One * 1, Vector3.UnitY);
             var colorCorrection = new ColorCorrection(Gamma, 1);
-            var world = new World(grid, _ambientColor, new Floor(0, new Material(Vector3.One * 0.7f, 0)));
+            var sun = new Sun(Vector3.Normalize(new Vector3(1f, -1f, -0.5f)), Vector3.One);
+            var world = new World(grid, _ambientColor, new Floor(0, new Material(Vector3.One * 0.7f, 0)), sun);
             var renderer = new Renderer(world, camera, colorCorrection, _renderSamples, _resolution);
             
             var progress = new Progress<RenderProgress>();
