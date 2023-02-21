@@ -55,8 +55,10 @@ public class RayTracer
         }
 
         var correctedHitPoint = hit.Point + hit.Normal * 0.001f;
-        var point = GetRandomPointOnUnitSphere() + correctedHitPoint + hit.Normal;
-        var direction = Vector3.Normalize(point - correctedHitPoint);
+        if (!GetReflectionDirection(hit, correctedHitPoint, ray, out var direction))
+        {
+            return Vector3.Zero;
+        }
 
         var incomingLight = TraceInternal(new Ray(correctedHitPoint, direction), depth - 1);
         if (IsSunVisibleFromHit(hit))
@@ -70,6 +72,30 @@ public class RayTracer
         return light;
     }
 
+    private bool GetReflectionDirection(Hit hit, Vector3 correctedHitPoint, Ray incomingRay, out Vector3 direction)
+    {
+        if (hit.Material.Metallic < 1f)
+        {
+            var isMetallicReflection = _random.NextSingle() > hit.Material.Metallic;
+
+            if (isMetallicReflection)
+            {
+                var reflection = Vector3.Reflect(incomingRay.Direction, hit.Normal);
+                if (hit.Material.Roughness > 0)
+                {
+                    reflection += GetRandomPointOnScaledSphere(hit.Material.Roughness);
+                }
+                direction = Vector3.Normalize(reflection);
+                return Vector3.Dot(direction, hit.Normal) > 0f;
+            }
+        }
+        
+        var point = GetRandomPointOnUnitSphere() + correctedHitPoint + hit.Normal;
+        direction = Vector3.Normalize(point - correctedHitPoint);
+
+        return true;
+    }
+
     private bool IsSunVisibleFromHit(Hit hit)
     {
         if (Vector3.Dot(hit.Normal, _sunReflectionDir) < 0.001f)
@@ -81,6 +107,19 @@ public class RayTracer
         var ray = new Ray(correctedHitPoint, _sunReflectionDir);
 
         return !_floorIntersection.Intersects(ray, out var _) && !_gridIntersection.Intersects(ray, out var _);
+    }
+
+    private Vector3 GetRandomPointOnScaledSphere(float scale)
+    {
+        var scaleSquared = scale * scale;
+        Vector3 point;
+        do
+        {
+            point = new Vector3(RandomForUnitSphere() * scale, RandomForUnitSphere() * scale,
+                RandomForUnitSphere() * scale);
+        } while (point.LengthSquared() >= scaleSquared);
+
+        return point;
     }
 
     private Vector3 GetRandomPointOnUnitSphere()
