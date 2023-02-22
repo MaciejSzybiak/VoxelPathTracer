@@ -44,7 +44,7 @@ public class RayTracer
         }
 
         var incomingLight = TraceInternal(new Ray(correctedHitPoint, direction), depth - 1);
-        if (IsSunVisibleFromHit(hit))
+        if (IsSunVisibleFromHit(hit, correctedHitPoint))
         {
             incomingLight += _world.Sun.Color * SunIntensity;
         }
@@ -99,7 +99,7 @@ public class RayTracer
         return true;
     }
 
-    private bool IsSunVisibleFromHit(Hit hit)
+    private bool IsSunVisibleFromHit(Hit hit, Vector3 correctedHitPoint)
     {
         var dir = Vector3.Normalize(_sunReflectionDir + GetRandomPointOnScaledSphere(_world.Sun.Softness));
         if (Vector3.Dot(hit.Normal, dir) < 0.001f)
@@ -107,10 +107,9 @@ public class RayTracer
             return false;
         }
         
-        var correctedHitPoint = hit.Point + hit.Normal * 0.001f;
         var ray = new Ray(correctedHitPoint, dir);
 
-        return !_floorIntersection.Intersects(ray, out var _) && !_gridIntersection.Intersects(ray, out var _);
+        return !IntersectsWorld(ray, out var _);
     }
 
     private Vector3 GetRandomPointOnScaledSphere(float scale)
