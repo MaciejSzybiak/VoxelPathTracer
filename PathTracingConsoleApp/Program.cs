@@ -4,7 +4,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VoxelPathTracing;
 
-const int renderSamples = 1500;
+const int renderSamples = 100;
 const float gamma = 2.2f;
 const float fov = 0.3f;
 var resolution = (x: 1000, y: 1000);
@@ -33,7 +33,7 @@ Console.WriteLine($"SIMD: {Vector.IsHardwareAccelerated}");
 
 IGridProvider gridProvider = new ColumnGridProvider(gridOrigin, gridSize);
 var grid = gridProvider.Get();
-var sun = new Sun(Vector3.Normalize(new Vector3(1f, -1f, -0.5f)), Vector3.One);
+var sun = new Sun(Vector3.Normalize(new Vector3(1f, -1f, -0.5f)), Vector3.One, 0.03f);
 var floor = new Floor(0, new Material(Vector3.One * 0.65f, 0, 0.5f, 0.35f));
 var world = new World(grid, Vector3.One * 0.8f, floor, sun);
 

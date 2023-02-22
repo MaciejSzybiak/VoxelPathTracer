@@ -28,30 +28,13 @@ public class RayTracer
 
     private Vector3 TraceInternal(Ray ray, int depth)
     {
-        Hit hit;
-        
-        if (!_floorIntersection.Intersects(ray, out var floorHit))
-        {
-            if (!_gridIntersection.Intersects(ray, out hit))
-            {
-                return _world.BackgroundColor;
-            }
-        }
-        else
-        {
-            if (!_gridIntersection.Intersects(ray, out var gridHit) || gridHit.Distance > floorHit.Distance)
-            {
-                hit = floorHit;
-            }
-            else
-            {
-                hit = gridHit;
-            }
-        }
-        
         if (depth == 0)
         {
             return Vector3.Zero;
+        }
+        if (!IntersectsWorld(ray, out var hit))
+        {
+            return _world.BackgroundColor;
         }
 
         var correctedHitPoint = hit.Point + hit.Normal * 0.001f;
@@ -70,6 +53,26 @@ public class RayTracer
                     hit.Material.Color * incomingLight;
 
         return light;
+    }
+
+    private bool IntersectsWorld(Ray ray, out Hit hit)
+    {
+        if (!_floorIntersection.Intersects(ray, out hit))
+        {
+            if (!_gridIntersection.Intersects(ray, out hit))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (_gridIntersection.Intersects(ray, out var gridHit) && !(gridHit.Distance > hit.Distance))
+            {
+                hit = gridHit;
+            }
+        }
+
+        return true;
     }
 
     private bool GetReflectionDirection(Hit hit, Vector3 correctedHitPoint, Ray incomingRay, out Vector3 direction)
@@ -98,13 +101,14 @@ public class RayTracer
 
     private bool IsSunVisibleFromHit(Hit hit)
     {
-        if (Vector3.Dot(hit.Normal, _sunReflectionDir) < 0.001f)
+        var dir = Vector3.Normalize(_sunReflectionDir + GetRandomPointOnScaledSphere(_world.Sun.Softness));
+        if (Vector3.Dot(hit.Normal, dir) < 0.001f)
         {
             return false;
         }
         
         var correctedHitPoint = hit.Point + hit.Normal * 0.001f;
-        var ray = new Ray(correctedHitPoint, _sunReflectionDir);
+        var ray = new Ray(correctedHitPoint, dir);
 
         return !_floorIntersection.Intersects(ray, out var _) && !_gridIntersection.Intersects(ray, out var _);
     }
