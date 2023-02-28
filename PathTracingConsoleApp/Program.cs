@@ -7,7 +7,7 @@ using VoxelPathTracing;
 const int renderSamples = 100;
 const float gamma = 2.2f;
 const float fov = 0.3f;
-var resolution = (x: 1000, y: 1000);
+var resolution = (x: 3440, y: 1440);
 var cameraOrigin = new Vector3(-9, 20, -10);
 var gridOrigin = (x: 0, y: 0, z: 0);
 var gridSize = (x: 6, y: 5, z: 6);
@@ -34,6 +34,7 @@ Console.WriteLine($"SIMD: {Vector.IsHardwareAccelerated}");
 IGridProvider gridProvider = new ColumnGridProvider(gridOrigin, gridSize);
 var grid = gridProvider.Get();
 var sun = new Sun(Vector3.Normalize(new Vector3(1f, -1f, -0.5f)), Vector3.One, 0.03f);
+// var floor = new Floor(0, new Material(new Vector3(0.7f, 0.88f, 0.85f), 0, 0.7f, 0.05f));
 var floor = new Floor(0, new Material(Vector3.One * 0.65f, 0, 0.5f, 0.35f));
 var world = new World(grid, Vector3.One * 0.8f, floor, sun);
 

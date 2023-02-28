@@ -2,7 +2,7 @@
 
 namespace VoxelPathTracing;
 
-public readonly struct Hit
+internal readonly struct Hit
 {
     public readonly Vector3 Normal;
     public readonly Vector3 Point;

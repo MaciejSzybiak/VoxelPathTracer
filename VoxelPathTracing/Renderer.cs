@@ -110,7 +110,7 @@ public class Renderer
                         dx += _random.NextSingle() * _xFraction - _xHalfFraction;
                         dy += _random.NextSingle() * _yFraction - _yHalfFraction;
 
-                        var ray = _perspectiveCamera.GetRay(new Vector2(dx, dy));
+                        var ray = _perspectiveCamera.GetRay(dx, dy);
 
                         renderedQuad.Image[x - quad.XStart, y - quad.YStart] += _rayTracer.Trace(ray);
                     }

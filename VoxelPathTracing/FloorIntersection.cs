@@ -2,7 +2,7 @@
 
 namespace VoxelPathTracing;
 
-public class FloorIntersection
+internal class FloorIntersection
 {
     private readonly Floor _floor;
     private readonly Vector3 _normal = Vector3.UnitY;

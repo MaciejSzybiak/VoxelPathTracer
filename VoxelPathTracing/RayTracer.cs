@@ -2,7 +2,7 @@
 
 namespace VoxelPathTracing;
 
-public class RayTracer
+internal class RayTracer
 {
     private readonly World _world;
     private readonly GridIntersection _gridIntersection;
@@ -23,7 +23,7 @@ public class RayTracer
 
     public Vector3 Trace(Ray ray)
     {
-        return TraceInternal(ray, 30);
+        return TraceInternal(ray, _world.Reflections);
     }
 
     private Vector3 TraceInternal(Ray ray, int depth)
@@ -77,9 +77,9 @@ public class RayTracer
 
     private bool GetReflectionDirection(Hit hit, Vector3 correctedHitPoint, Ray incomingRay, out Vector3 direction)
     {
-        if (hit.Material.Metallic < 1f)
+        if (hit.Material.Mirror > 0f)
         {
-            var isMetallicReflection = _random.NextSingle() > hit.Material.Metallic;
+            var isMetallicReflection = _random.NextSingle() < hit.Material.Mirror;
 
             if (isMetallicReflection)
             {

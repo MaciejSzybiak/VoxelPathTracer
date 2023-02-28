@@ -5,7 +5,6 @@ namespace VoxelPathTracing;
 public class PerspectiveCamera
 {
     private readonly Vector3 _origin;
-
     private readonly Vector3 _forward;
     private readonly Vector3 _up;
     private readonly Vector3 _right;
@@ -24,12 +23,12 @@ public class PerspectiveCamera
         _width = _height * aspectRatio;
     }
 
-    public Ray GetRay(Vector2 point)
+    internal Ray GetRay(float x, float y)
     {
         var direction =
             _forward
-            + point.X * _width * _right
-            + point.Y * _height * _up;
+            + x * _width * _right
+            + y * _height * _up;
 
         return new Ray(_origin, Vector3.Normalize(direction));
     }

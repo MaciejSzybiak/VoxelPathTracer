@@ -2,7 +2,7 @@
 
 namespace VoxelPathTracing;
 
-public struct Ray
+internal struct Ray
 {
     public Vector3 Origin { get; set; }
     public Vector3 Direction { get; }

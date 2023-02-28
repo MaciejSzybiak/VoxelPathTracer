@@ -2,7 +2,7 @@
 
 namespace VoxelPathTracing;
 
-public class GridIntersection
+internal class GridIntersection
 {
     private const float RayCropEpsilon = 0.01f;
     
