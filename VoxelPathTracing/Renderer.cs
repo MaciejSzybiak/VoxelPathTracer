@@ -37,6 +37,12 @@ public class Renderer
         _yFraction = 1f / _halfResolutionY;
     }
 
+    public async Task Render(IProgress<RenderProgress> progress)
+    {
+        var cancellationTokenSource = new CancellationTokenSource();
+        await Render(progress, cancellationTokenSource.Token);
+    }
+
     public async Task Render(IProgress<RenderProgress> progress, CancellationToken cancellationToken)
     {
         var quads = new List<Quad>();
@@ -60,7 +66,7 @@ public class Renderer
 
         try
         {
-            await Parallel.ForEachAsync(quads, cancellationToken, async (quad, token) =>
+            await Parallel.ForEachAsync(quads, cancellationToken, async (quad, _) =>
             {
                 var renderedQuad = await RunWorkOnQuad(quad);
 

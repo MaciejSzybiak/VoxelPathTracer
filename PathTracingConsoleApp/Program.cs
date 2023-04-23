@@ -4,58 +4,88 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VoxelPathTracing;
 
-const int renderSamples = 100;
-const float gamma = 2.2f;
-const float fov = 0.3f;
-var resolution = (x: 3440, y: 1440);
-var cameraOrigin = new Vector3(-9, 20, -10);
-var gridOrigin = (x: 0, y: 0, z: 0);
-var gridSize = (x: 6, y: 5, z: 6);
+namespace PathTracingConsoleApp;
 
-void SaveImage(Vector3[,] render)
+internal static class Program
 {
-    var image = new Image<Rgb24>(render.GetLength(0), render.GetLength(1));
-
-    for (var y = 0; y < render.GetLength(1); y++)
+    private const int RenderSamples = 200;
+    private const float Gamma = 2.2f;
+    private const float Fov = 0.3f;
+    private static readonly Vector3 CameraOrigin = new(-9, 20, -10);
+    private static readonly (int x, int y, int z) GridOrigin = (x: 0, y: 0, z: 0);
+    private static readonly (int x, int y, int z) GridSize = (x: 6, y: 5, z: 6);
+    private static readonly (int x, int y) Resolution = (x: 500, y: 500);
+    
+    public static async Task Main()
     {
-        for (var x = 0; x < render.GetLength(0); x++)
-        {
-            var value = render[x, y];
-            image[x, render.GetLength(1) - 1 - y] = 
-                new Rgb24((byte) (value.X * 255), (byte) (value.Y * 255), (byte) (value.Z * 255));
-        }
+        Console.WriteLine($"SIMD: {Vector.IsHardwareAccelerated}");
+
+        var world = GetWorld();
+        var camera = GetCamera(world);
+        var colorCorrection = new ColorCorrection(Gamma, 1);
+
+        var image = await Render(world, camera, colorCorrection);
+
+        SaveImage(image);
     }
 
-    image.Save("image.png");
+    private static async Task<Vector3[,]> Render(World world, PerspectiveCamera camera, ColorCorrection colorCorrection)
+    {
+        var renderer = new Renderer(world, camera, colorCorrection, RenderSamples, Resolution);
+
+        var image = new Vector3[1,1];
+        var progress = new Progress<RenderProgress>();
+        progress.ProgressChanged += (_, renderProgress) => image = renderProgress.Image;
+
+        await ExecuteRender(renderer, progress);
+
+        return image;
+    }
+
+    private static async Task ExecuteRender(Renderer renderer, IProgress<RenderProgress> progress)
+    {
+        var stopwatch = new Stopwatch();
+        
+        stopwatch.Start();
+        await renderer.Render(progress);
+        stopwatch.Stop();
+        
+        var timeSpan = stopwatch.Elapsed;
+        Console.WriteLine($"Time: {timeSpan.Hours}:{timeSpan.Minutes}:{timeSpan.Seconds}.{timeSpan.Milliseconds}");
+    }
+
+    private static World GetWorld()
+    {
+        IGridProvider gridProvider = new ColumnGridProvider(GridOrigin, GridSize);
+        var grid = gridProvider.Get();
+        var sun = new Sun(Vector3.Normalize(new Vector3(1f, -1f, -0.5f)), Vector3.One, 0.03f);
+        var floor = new Floor(0, new Material(Vector3.One * 0.65f, 0, 0.5f, 0.35f));
+        return new World(grid, Vector3.One * 0.8f, floor, sun);
+    }
+
+    private static PerspectiveCamera GetCamera(World world)
+    {
+        var grid = world.Grid;
+        var center = new Vector3(grid.Size.X / 2f + GridOrigin.x, grid.Size.Y / 2f + GridOrigin.y, grid.Size.Z / 2f + GridOrigin.z);
+        var target = center - Vector3.UnitY;
+        return new PerspectiveCamera(Fov, (float) Resolution.x / Resolution.y, 
+            CameraOrigin, target, Vector3.UnitY);
+    }
+    
+    private static void SaveImage(Vector3[,] render)
+    {
+        var image = new Image<Rgb24>(render.GetLength(0), render.GetLength(1));
+
+        for (var y = 0; y < render.GetLength(1); y++)
+        {
+            for (var x = 0; x < render.GetLength(0); x++)
+            {
+                var value = render[x, y];
+                image[x, render.GetLength(1) - 1 - y] = 
+                    new Rgb24((byte) (value.X * 255), (byte) (value.Y * 255), (byte) (value.Z * 255));
+            }
+        }
+
+        image.Save("image.png");
+    }
 }
-
-Console.WriteLine($"SIMD: {Vector.IsHardwareAccelerated}");
-
-IGridProvider gridProvider = new ColumnGridProvider(gridOrigin, gridSize);
-var grid = gridProvider.Get();
-var sun = new Sun(Vector3.Normalize(new Vector3(1f, -1f, -0.5f)), Vector3.One, 0.03f);
-// var floor = new Floor(0, new Material(new Vector3(0.7f, 0.88f, 0.85f), 0, 0.7f, 0.05f));
-var floor = new Floor(0, new Material(Vector3.One * 0.65f, 0, 0.5f, 0.35f));
-var world = new World(grid, Vector3.One * 0.8f, floor, sun);
-
-var center = new Vector3(grid.Size.X / 2f + gridOrigin.x, grid.Size.Y / 2f + gridOrigin.y, grid.Size.Z / 2f + gridOrigin.z);
-var target = center - Vector3.UnitY;
-var camera = new PerspectiveCamera(fov, (float) resolution.x / resolution.y, 
-    cameraOrigin, target, Vector3.UnitY);
-var colorCorrection = new ColorCorrection(gamma, 1);
-var renderer = new Renderer(world, camera, colorCorrection, renderSamples, resolution);
-var stopwatch = new Stopwatch();
-
-var progress = new Progress<RenderProgress>();
-var image = new Vector3[1,1];
-progress.ProgressChanged += (sender, renderProgress) => image = renderProgress.Image;
-
-var cancellationTokenSource = new CancellationTokenSource();
-
-stopwatch.Start();
-await renderer.Render(progress, cancellationTokenSource.Token);
-var timeSpan = stopwatch.Elapsed;
-stopwatch.Stop();
-Console.WriteLine($"Time: {timeSpan.Hours}:{timeSpan.Minutes}:{timeSpan.Seconds}.{timeSpan.Milliseconds}");
-
-SaveImage(image);
