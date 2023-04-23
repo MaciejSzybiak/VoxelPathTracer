@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace VoxelPathTracing;
+namespace VoxelPathTracer;
 
 public class ColumnGridProvider : IGridProvider
 {

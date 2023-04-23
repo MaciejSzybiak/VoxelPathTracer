@@ -2,7 +2,7 @@
 using System.Numerics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using VoxelPathTracing;
+using VoxelPathTracer;
 
 namespace PathTracingConsoleApp;
 

@@ -1,4 +1,4 @@
-﻿namespace VoxelPathTracing;
+﻿namespace VoxelPathTracer;
 
 public class Floor
 {
