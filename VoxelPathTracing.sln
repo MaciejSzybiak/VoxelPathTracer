@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoxelPathTracing", "VoxelPa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracingConsoleApp", "PathTracingConsoleApp\PathTracingConsoleApp.csproj", "{46E38059-2366-476D-97F0-6E8020579372}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracingGui", "PathTracingGui\PathTracingGui.csproj", "{B0BAB9BB-6229-438D-BAC2-51DEBC7410C8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,9 +18,5 @@ Global
 		{46E38059-2366-476D-97F0-6E8020579372}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46E38059-2366-476D-97F0-6E8020579372}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46E38059-2366-476D-97F0-6E8020579372}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B0BAB9BB-6229-438D-BAC2-51DEBC7410C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B0BAB9BB-6229-438D-BAC2-51DEBC7410C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B0BAB9BB-6229-438D-BAC2-51DEBC7410C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B0BAB9BB-6229-438D-BAC2-51DEBC7410C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
