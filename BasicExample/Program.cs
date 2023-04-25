@@ -4,11 +4,11 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VoxelPathTracer;
 
-namespace PathTracingConsoleApp;
+namespace BasicExample;
 
 internal static class Program
 {
-    private const int RenderSamples = 200;
+    private const int RenderSamples = 1000;
     private const float Gamma = 2.2f;
     private const float Fov = 0.3f;
     private static readonly Vector3 CameraOrigin = new(-9, 20, -10);
@@ -16,20 +16,18 @@ internal static class Program
     private static readonly (int x, int y, int z) GridSize = (x: 6, y: 5, z: 6);
     private static readonly (int x, int y) Resolution = (x: 500, y: 500);
     
-    public static async Task Main()
+    public static void Main()
     {
-        Console.WriteLine($"SIMD: {Vector.IsHardwareAccelerated}");
-
         var world = GetWorld();
         var camera = GetCamera(world);
         var colorCorrection = new ColorCorrection(Gamma, 1);
 
-        var image = await Render(world, camera, colorCorrection);
+        var image = Render(world, camera, colorCorrection);
 
         SaveImage(image);
     }
 
-    private static async Task<Vector3[,]> Render(World world, PerspectiveCamera camera, ColorCorrection colorCorrection)
+    private static Vector3[,] Render(World world, PerspectiveCamera camera, ColorCorrection colorCorrection)
     {
         var renderer = new Renderer(world, camera, colorCorrection, RenderSamples, Resolution);
 
@@ -37,17 +35,17 @@ internal static class Program
         var progress = new Progress<RenderProgress>();
         progress.ProgressChanged += (_, renderProgress) => image = renderProgress.Image;
 
-        await ExecuteRender(renderer, progress);
+        ExecuteRender(renderer, progress);
 
         return image;
     }
 
-    private static async Task ExecuteRender(Renderer renderer, IProgress<RenderProgress> progress)
+    private static void ExecuteRender(Renderer renderer, IProgress<RenderProgress> progress)
     {
         var stopwatch = new Stopwatch();
         
         stopwatch.Start();
-        await renderer.Render(progress);
+        renderer.Render(progress).Wait();
         stopwatch.Stop();
         
         var timeSpan = stopwatch.Elapsed;
@@ -66,7 +64,8 @@ internal static class Program
     private static PerspectiveCamera GetCamera(World world)
     {
         var grid = world.Grid;
-        var center = new Vector3(grid.Size.X / 2f + GridOrigin.x, grid.Size.Y / 2f + GridOrigin.y, grid.Size.Z / 2f + GridOrigin.z);
+        var center = new Vector3(grid.Size.X / 2f + GridOrigin.x, grid.Size.Y / 2f + GridOrigin.y, 
+            grid.Size.Z / 2f + GridOrigin.z);
         var target = center - Vector3.UnitY;
         return new PerspectiveCamera(Fov, (float) Resolution.x / Resolution.y, 
             CameraOrigin, target, Vector3.UnitY);
