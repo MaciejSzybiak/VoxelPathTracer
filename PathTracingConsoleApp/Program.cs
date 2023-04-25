@@ -56,7 +56,7 @@ internal static class Program
 
     private static World GetWorld()
     {
-        IGridProvider gridProvider = new ColumnGridProvider(GridOrigin, GridSize);
+        IGridProvider gridProvider = new RandomGridProvider(GridOrigin, GridSize);
         var grid = gridProvider.Get();
         var sun = new Sun(Vector3.Normalize(new Vector3(1f, -1f, -0.5f)), Vector3.One, 0.03f);
         var floor = new Floor(0, new Material(Vector3.One * 0.65f, 0, 0.5f, 0.35f));

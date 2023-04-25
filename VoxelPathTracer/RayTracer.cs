@@ -84,7 +84,7 @@ internal class RayTracer
             if (isMetallicReflection)
             {
                 var reflection = Vector3.Reflect(incomingRay.Direction, hit.Normal);
-                if (hit.Material.Roughness > 0)
+                if (hit.Material.Roughness > 0f)
                 {
                     reflection += GetRandomPointOnScaledSphere(hit.Material.Roughness);
                 }

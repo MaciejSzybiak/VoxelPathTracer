@@ -2,7 +2,10 @@
 
 namespace VoxelPathTracer;
 
-public class ColumnGridProvider : IGridProvider
+/// <summary>
+/// GridProvider class for testing purposes
+/// </summary>
+public class RandomGridProvider : IGridProvider
 {
     private readonly (int X, int Y, int Z) _size;
     private const float MaxColor = 0.85f;
@@ -11,7 +14,7 @@ public class ColumnGridProvider : IGridProvider
 
     private readonly (int X, int Y, int Z) _origin;
 
-    public ColumnGridProvider((int X, int Y, int Z) origin, (int X, int Y, int Z) size)
+    public RandomGridProvider((int X, int Y, int Z) origin, (int X, int Y, int Z) size)
     {
         _origin = origin;
         _size = size;
