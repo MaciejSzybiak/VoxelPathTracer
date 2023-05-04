@@ -37,16 +37,34 @@ internal class RayTracer
             return _world.BackgroundColor;
         }
 
-        var correctedHitPoint = hit.Point + hit.Normal * 0.001f;
-        if (!GetReflectionDirection(hit, correctedHitPoint, ray, out var direction))
-        {
-            return Vector3.Zero;
-        }
+        Vector3 correctedHitPoint;
+        Vector3 direction;
+        // if (_random.NextSingle() > hit.Material.Opacity)
+        // {
+        //     correctedHitPoint = hit.Point + hit.Normal * -0.001f;
+        //     direction = GetRefractionDirection(hit, ray, correctedHitPoint);
+        // }
+        // else
+        // {
+            correctedHitPoint = hit.Point + hit.Normal * 0.001f;
+            if (!GetReflectionDirection(hit, correctedHitPoint, ray, out direction))
+            {
+                return Vector3.Zero;
+            }
+        // }
 
         var incomingLight = TraceInternal(new Ray(correctedHitPoint, direction), depth - 1);
         if (IsSunVisibleFromHit(hit, correctedHitPoint))
         {
             incomingLight += _world.Sun.Color * SunIntensity;
+        }
+
+        if (hit.Material.Opacity < 1f)
+        {
+            correctedHitPoint = hit.Point + hit.Normal * -0.001f;
+            direction = GetRefractionDirection(hit, ray, correctedHitPoint);
+            var incomingRefraction = TraceInternal(new Ray(correctedHitPoint, direction), depth - 1);
+            incomingLight = incomingLight * hit.Material.Opacity + incomingRefraction * (1f - hit.Material.Opacity);
         }
 
         var light = hit.Material.Color * hit.Material.Emission +
@@ -97,6 +115,16 @@ internal class RayTracer
         direction = Vector3.Normalize(point - correctedHitPoint);
 
         return true;
+    }
+
+    private Vector3 GetRefractionDirection(Hit hit, Ray incomingRay, Vector3 correctedHitPoint)
+    {
+        const float eta = 1f / 1.3f;
+
+        var cosTheta = MathF.Min(Vector3.Dot(-incomingRay.Direction, hit.Normal), 1f);
+        var perpendicular = eta * (incomingRay.Direction + cosTheta * hit.Normal);
+        var parallel = -MathF.Sqrt(MathF.Abs(1f - perpendicular.LengthSquared())) * hit.Normal;
+        return perpendicular + parallel;
     }
 
     private bool IsSunVisibleFromHit(Hit hit, Vector3 correctedHitPoint)

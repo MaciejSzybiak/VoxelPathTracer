@@ -35,7 +35,7 @@ public class MengerSpongeGridProvider : IGridProvider
 
     private void Fill(Grid grid)
     {
-        var material = new Material(_color, 0f, 0.1f, 0.8f);
+        var material = new Material(_color, 0f, 0.1f, 0.8f, 0f);
         for (var x = 0; x < Size; x++)
         for (var y = 0; y < Size; y++)
         for (var z = 0; z < Size; z++)
@@ -66,7 +66,7 @@ public class MengerSpongeGridProvider : IGridProvider
     private void AddLight(Grid grid)
     {
         var factor = Size / 12;
-        var start = factor * 4;
+        var start = Math.Max(factor * 4, 1);
         var end = Size - start;
         for (var x = start; x < end; x++)
         for (var y = start; y < end; y++)

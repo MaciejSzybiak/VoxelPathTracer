@@ -96,6 +96,20 @@ internal class GridIntersection
         var yMax = _grid.Size.Y + _grid.Origin.Y;
         var zMax = _grid.Size.Z + _grid.Origin.Z;
 
+        var refracts = false;
+        Material? lastVoxel = null;
+        if (ray.Origin.X >= xMin && ray.Origin.X < xMax
+              && ray.Origin.Y >= yMin && ray.Origin.Y < yMax
+              && ray.Origin.Z >= zMin && ray.Origin.Z < zMax)
+        {
+            var voxel = _grid[xPosition, yPosition, zPosition];
+            if (voxel is not null)
+            {
+                refracts = true;
+                lastVoxel = voxel;
+            }
+        }
+
         while (rayLength < maxLength)
         {
             if (xPosition >= xMin && xPosition < xMax
@@ -103,11 +117,21 @@ internal class GridIntersection
                 && zPosition >= zMin && zPosition < zMax)
             {
                 var voxel = _grid[xPosition, yPosition, zPosition];
-                if (voxel is not null)
+                if (refracts)
+                {
+                    if (voxel is null)
+                    {
+                        hit = new Hit(hitNormal * -1, ray.Origin + ray.Direction * rayLength, lastVoxel, rayLength); // fixme
+                        return true;
+                    }
+                }
+                else if (voxel is not null)
                 {
                     hit = new Hit(hitNormal, ray.Origin + ray.Direction * rayLength, voxel, rayLength);
                     return true;
                 }
+
+                lastVoxel = voxel;
             }
 
             if (xRayLength < yRayLength)
