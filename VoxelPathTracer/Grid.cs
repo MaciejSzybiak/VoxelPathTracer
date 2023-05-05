@@ -2,7 +2,7 @@
 
 namespace VoxelPathTracer;
 
-public class Grid
+public partial class Grid
 {
     public (int X, int Y, int Z) Size { get; }
     public (int X, int Y, int Z) Origin { get; }

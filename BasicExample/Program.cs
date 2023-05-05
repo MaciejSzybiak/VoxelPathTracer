@@ -19,7 +19,7 @@ internal static class Program
     public static void Main()
     {
         var world = GetWorld();
-        var camera = GetCamera(world);
+        var camera = GetCamera();
         var colorCorrection = new ColorCorrection(Gamma, 1);
 
         var image = Render(world, camera, colorCorrection);
@@ -61,11 +61,10 @@ internal static class Program
         return new World(grid, Vector3.One * 0.8f, floor, sun);
     }
 
-    private static PerspectiveCamera GetCamera(World world)
+    private static PerspectiveCamera GetCamera()
     {
-        var grid = world.Grid;
-        var center = new Vector3(grid.Size.X / 2f + GridOrigin.x, grid.Size.Y / 2f + GridOrigin.y, 
-            grid.Size.Z / 2f + GridOrigin.z);
+        var center = new Vector3(GridSize.x / 2f + GridOrigin.x, GridSize.y / 2f + GridOrigin.y, 
+            GridSize.z / 2f + GridOrigin.z);
         var target = center - Vector3.UnitY;
         return new PerspectiveCamera(Fov, (float) Resolution.x / Resolution.y, 
             CameraOrigin, target, Vector3.UnitY);

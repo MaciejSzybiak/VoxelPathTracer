@@ -2,18 +2,11 @@
 
 namespace VoxelPathTracer;
 
-internal class GridIntersection
+public partial class Grid : Volume
 {
     private const float RayCropEpsilon = 0.01f;
     
-    private readonly Grid _grid;
-
-    public GridIntersection(Grid grid)
-    {
-        _grid = grid;
-    }
-
-    public bool Intersects(Ray ray, out Hit hit)
+    internal override bool Intersects(Ray ray, out Hit hit)
     {
         if (!TryCropRayToBounds(ref ray, out var maxLength))
         {
@@ -89,12 +82,12 @@ internal class GridIntersection
         }
         
         var rayLength = 0f;
-        var xMin = _grid.Origin.X;
-        var yMin = _grid.Origin.Y;
-        var zMin = _grid.Origin.Z;
-        var xMax = _grid.Size.X + _grid.Origin.X;
-        var yMax = _grid.Size.Y + _grid.Origin.Y;
-        var zMax = _grid.Size.Z + _grid.Origin.Z;
+        var xMin = Origin.X;
+        var yMin = Origin.Y;
+        var zMin = Origin.Z;
+        var xMax = Size.X + Origin.X;
+        var yMax = Size.Y + Origin.Y;
+        var zMax = Size.Z + Origin.Z;
 
         while (rayLength < maxLength)
         {
@@ -102,7 +95,7 @@ internal class GridIntersection
                 && yPosition >= yMin && yPosition < yMax
                 && zPosition >= zMin && zPosition < zMax)
             {
-                var voxel = _grid[xPosition, yPosition, zPosition];
+                var voxel = this[xPosition, yPosition, zPosition];
                 if (voxel is not null)
                 {
                     hit = new Hit(hitNormal, ray.Origin + ray.Direction * rayLength, voxel, rayLength);
@@ -149,14 +142,14 @@ internal class GridIntersection
         hit = new Hit();
         return false;
     }
-
+    
     private bool TryCropRayToBounds(ref Ray ray, out float maxLength)
     {
         var tMin = float.NegativeInfinity;
         var tMax = float.PositiveInfinity;
 
-        var v1 = (_grid.Min - ray.Origin) * ray.DirectionInverted;
-        var v2 = (_grid.Max - ray.Origin) * ray.DirectionInverted;
+        var v1 = (Min - ray.Origin) * ray.DirectionInverted;
+        var v2 = (Max - ray.Origin) * ray.DirectionInverted;
 
         for (var i = 0; i < 3; i++)
         {
