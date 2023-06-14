@@ -33,7 +33,6 @@ internal class RayTracer
             return _world.BackgroundColor;
         }
 
-        var correctedHitPoint = hit.Point + hit.Normal * 0.001f;
         var bounce = hit.Material.GetBouncedRay(ray, hit, _random);
         if (!bounce.HasValue)
         {
@@ -68,34 +67,9 @@ internal class RayTracer
         return distance < float.PositiveInfinity;
     }
 
-    private bool GetReflectionDirection(Hit hit, Vector3 correctedHitPoint, Ray incomingRay, out Vector3 direction)
-    {
-        if (hit.Material.Mirror > 0f)
-        {
-            var isMetallicReflection = _random.NextSingle() < hit.Material.Mirror;
-
-            if (isMetallicReflection)
-            {
-                var reflection = Vector3.Reflect(incomingRay.Direction, hit.Normal);
-                if (hit.Material.Roughness > 0f)
-                {
-                    reflection += GetRandomPointOnScaledSphere(hit.Material.Roughness);
-                }
-
-                direction = Vector3.Normalize(reflection);
-                return Vector3.Dot(direction, hit.Normal) > 0f;
-            }
-        }
-
-        var point = GetRandomPointOnUnitSphere() + correctedHitPoint + hit.Normal;
-        direction = Vector3.Normalize(point - correctedHitPoint);
-
-        return true;
-    }
-
     private bool IsSunVisibleFromHit(Hit hit, Vector3 correctedHitPoint)
     {
-        var dir = Vector3.Normalize(_sunReflectionDir + GetRandomPointOnScaledSphere(_world.Sun.Softness));
+        var dir = Vector3.Normalize(_sunReflectionDir + RandomUtil.GetRandomPointOnScaledSphere(_world.Sun.Softness, _random));
         if (Vector3.Dot(hit.Normal, dir) < 0.001f)
         {
             return false;
@@ -104,34 +78,5 @@ internal class RayTracer
         var ray = new Ray(correctedHitPoint, dir);
 
         return !IntersectsWorld(ray, out var _);
-    }
-
-    private Vector3 GetRandomPointOnScaledSphere(float scale)
-    {
-        var scaleSquared = scale * scale;
-        Vector3 point;
-        do
-        {
-            point = new Vector3(RandomForUnitSphere() * scale, RandomForUnitSphere() * scale,
-                RandomForUnitSphere() * scale);
-        } while (point.LengthSquared() >= scaleSquared);
-
-        return point;
-    }
-
-    private Vector3 GetRandomPointOnUnitSphere()
-    {
-        Vector3 point;
-        do
-        {
-            point = new Vector3(RandomForUnitSphere(), RandomForUnitSphere(), RandomForUnitSphere());
-        } while (point.LengthSquared() >= 1);
-
-        return Vector3.Normalize(point);
-    }
-
-    private float RandomForUnitSphere()
-    {
-        return _random.NextSingle() * 2f - 1f;
     }
 }
