@@ -84,6 +84,12 @@ void SaveImage(Vector3[,] render, Options options)
         path += ".png";
     }
 
+    if (options.Denoise)
+    {
+        Console.WriteLine("Denoising...");
+        image.Mutate(c => c.MedianBlur(1, true));
+    }
+    
     Console.WriteLine($"Saving image to: {path}");
     image.Save(path);
 }

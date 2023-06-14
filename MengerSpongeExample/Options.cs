@@ -8,7 +8,7 @@ internal class Options
     [Option('i', "iterations", Default = 3, HelpText = "Number of iterations in range [1, 6]")]
     public int Iterations { get; }
     
-    [Option('s', "samples", Default = 30, HelpText = "Number of render samples")]
+    [Option('s', "samples", Default = 300, HelpText = "Number of render samples")]
     public int Samples { get; }
     
     [Option('r', "resolution", Default = 500, HelpText = "Resolution of rendered image")]
@@ -23,7 +23,10 @@ internal class Options
     [Option('c', "color", Default = ColorValue.Cyan, HelpText = "White, Gray, Black, Cyan, Yellow, Red, Green, Blue")]
     public ColorValue ColorValue { get; }
     
-    public Options(int iterations, int samples, int resolution, string path, bool addLight, ColorValue colorValue)
+    [Option('d', "denoiser", Default = false, HelpText = "Use median filter to reduce noise")]
+    public bool Denoise { get; }
+    
+    public Options(int iterations, int samples, int resolution, string path, bool addLight, ColorValue colorValue, bool denoise)
     {
         Iterations = iterations;
         Samples = samples;
@@ -31,6 +34,7 @@ internal class Options
         Path = path;
         AddLight = addLight;
         ColorValue = colorValue;
+        Denoise = denoise;
     }
 
     public bool Validate(out string error)
