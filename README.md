@@ -31,7 +31,7 @@ A CPU-only path tracer for rendering voxel grids.
 #### BasicExample
 Rnders an image with some predefined settings.
 
-####MengerSpongeExample
+#### MengerSpongeExample
 Renders a menger sponge (like in the picture above). The program is executed using command line and has 
 the following options:
 ```
